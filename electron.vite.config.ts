@@ -1,0 +1,48 @@
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import * as path from 'node:path'
+import tanstackRouter from '@tanstack/router-plugin/vite'
+
+// --entry ../../node_modules/electron
+export default defineConfig(() => {
+  return {
+    main: {
+      plugins: [externalizeDepsPlugin()],
+      build: { watch: {} }
+      // resolve: {
+      //   alias: {
+      //     "@denzere/assist-api": path.resolve("src","main","@mono-assist-api")
+      //   }
+      // }
+    },
+    preload: {
+      plugins: [externalizeDepsPlugin()]
+    },
+    renderer: {
+      resolve: {
+        alias: {
+          '@renderer': path.resolve('src', 'renderer', 'src')
+        }
+      },
+      plugins: [
+        tailwindcss(),
+        tanstackRouter({
+          target: 'react',
+          routeToken: 'layout',
+          autoCodeSplitting: true,
+          quoteStyle: 'single',
+          routeFileIgnorePrefix: '-',
+          routesDirectory: path.resolve('src', 'renderer', 'src', 'routes'),
+          generatedRouteTree: path.resolve(
+            'src',
+            'renderer',
+            'src',
+            'routeTree.gen.ts'
+          )
+        }),
+        react()
+      ]
+    }
+  }
+})

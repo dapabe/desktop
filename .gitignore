@@ -1,0 +1,7 @@
+.tanstack
+node_modules
+.temp
+dist
+electron-cache
+out
+pnpm-lock.yaml
