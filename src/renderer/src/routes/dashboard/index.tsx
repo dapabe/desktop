@@ -12,14 +12,13 @@ function Component(): ReactNode {
 
   const currentListeners = API.PROTECTED.getCurrentListeners.useQuery()
   const requestHelp = API.PROTECTED.requestHelp.useMutation()
-  if (currentListeners.isLoading || currentListeners.isError) return null
 
   return (
     <section className="grow flex flex-col">
       <div className="grow flex items-center justify-center p-4">
         <button
           className="btn btn-primary btn-circle size-80 text-4xl"
-          disabled={!currentListeners.data.length}
+          disabled={!currentListeners.data?.length || currentListeners.isError}
           onClick={() => requestHelp.mutate()}
         >
           {t('Dashboard.PageEmitter.MainButton')}
@@ -32,11 +31,15 @@ function Component(): ReactNode {
             {t('Dashboard.PageEmitter.ListenersLabel')}
           </div>
           <div className="stat-value font-mono">
-            {currentListeners.data.length}
+            {currentListeners.isLoading
+              ? 0
+              : currentListeners.isError
+                ? 'ERROR'
+                : currentListeners.data.length}
           </div>
         </div>
         <div className="stat">
-          <label className="label text-sm hover:cursor-not-allowed">
+          {/* <label className="label text-sm hover:cursor-not-allowed">
             <input
               type="checkbox"
               defaultChecked
@@ -44,7 +47,7 @@ function Component(): ReactNode {
               className="checkbox checkbox-sm rounded-sm"
             />
             {t('Dashboard.PageEmitter.EnableDetectionCheckbox')}
-          </label>
+          </label> */}
         </div>
       </div>
     </section>

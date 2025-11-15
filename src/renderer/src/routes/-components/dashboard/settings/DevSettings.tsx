@@ -1,16 +1,13 @@
 import { API } from '@renderer/services/trpc'
-import { useRouter } from '@tanstack/react-router'
 
 import { ReactNode } from 'react'
 
 export function DevSettings(): ReactNode {
-  const router = useRouter()
   const deleteAccount = API.UTILS.localLogout.useMutation()
 
   const handleDelete = async (): Promise<void> => {
     await deleteAccount.mutateAsync()
-    // window.location.reload()
-    router.invalidate()
+    window.location.reload()
   }
 
   return (

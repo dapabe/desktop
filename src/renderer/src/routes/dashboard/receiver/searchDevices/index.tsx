@@ -1,10 +1,16 @@
-import { API } from '@renderer/services/trpc'
-import { ReactNode, useMemo, useState } from 'react'
-import * as Icon from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 import { IWSRoom } from '@denzere/assist-api'
+import { API } from '@renderer/services/trpc'
+import { createFileRoute } from '@tanstack/react-router'
+import { UserPlusIcon } from 'lucide-react'
+import { ReactNode, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useDashboard } from '../../-hooks/useDashboard'
 
-export function ReceiverSearchDevices(): ReactNode {
+export const Route = createFileRoute('/dashboard/receiver/searchDevices/')({
+  component: Component
+})
+
+function Component(): ReactNode {
   const { t } = useTranslation()
   const [list, setList] = useState<IWSRoom[]>([])
   const addToListeningTo = API.PROTECTED.addToListeningTo.useMutation()
@@ -67,7 +73,7 @@ export function ReceiverSearchDevices(): ReactNode {
               className="btn btn-ghost col-span-2"
               onClick={() => addToListeningTo.mutate({ appId: x.appId })}
             >
-              <Icon.UserPlus className="text-neutral size-6 mr-2" />
+              <UserPlusIcon className="text-neutral size-6 mr-2" />
               <div className="flex flex-col items-start">
                 <span>{x.callerName}</span>
                 <span>{x.device}</span>
@@ -83,17 +89,13 @@ export function ReceiverSearchDevices(): ReactNode {
 
 function DiscoveryButton({ disabled }: { disabled?: boolean }): ReactNode {
   const { t } = useTranslation()
-  const [discovery, setDiscovery] = useState({ counter: 0, done: true })
+  const { discoveryState } = useDashboard()
 
   const startDiscovery = API.PROTECTED.startDiscovery.useMutation()
 
-  API.PROTECTED.sendDiscovery.useSubscription(undefined, {
-    onData: (x) => setDiscovery(x)
-  })
-
   const onCooldown = useMemo(
-    () => discovery.counter !== 0 && !discovery.done,
-    [discovery]
+    () => discoveryState.counter !== 0 && !discoveryState.done,
+    [discoveryState]
   )
 
   return (
@@ -103,7 +105,7 @@ function DiscoveryButton({ disabled }: { disabled?: boolean }): ReactNode {
       onClick={() => startDiscovery.mutateAsync()}
     >
       {onCooldown
-        ? `${discovery.counter}s`
+        ? `${discoveryState.counter}s`
         : t('Dashboard.PageReceiver.SearchDevicesTab.DetectButton')}
     </button>
   )

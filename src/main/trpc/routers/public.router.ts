@@ -25,6 +25,7 @@ export const PublicRouter = createTRPCRouter({
           .getRepos()
           .LocalData.create({ name: input.name })
       } catch (error) {
+        console.log(error)
         ErrorNotificationService.getInstance().showError(
           'db.localdata.create',
           ErrorNotificationService.getErrorMessage(error)

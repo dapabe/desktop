@@ -16,9 +16,9 @@ function Componenet(): ReactNode {
 
   if (ApiInit.isLoading) {
     return (
-      <DashboardLayout>
-        <Spinner />
-      </DashboardLayout>
+      // <DashboardLayout>
+      <Spinner />
+      // /* </DashboardLayout> */
     )
   }
 

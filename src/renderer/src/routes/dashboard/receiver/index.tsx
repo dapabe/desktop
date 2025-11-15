@@ -1,52 +1,60 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ReactNode, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { API } from '@renderer/services/trpc'
-import { ReceiverSelectedDevices } from '@renderer/routes/-components/dashboard/receiver/Receiver.SelectedDevices'
-import { ReceiverSearchDevices } from '@renderer/routes/-components/dashboard/receiver/Receiver.SearchDevices'
+import { createFileRoute } from '@tanstack/react-router'
+import { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/dashboard/receiver/')({
-  component: Component
+  component: RouteComponent
 })
 
-function Component(): ReactNode {
+function RouteComponent(): ReactNode {
   const { t } = useTranslation()
 
-  const room = API.PROTECTED.getRoomsListeningTo.useQuery()
-  const [cTab, setTab] = useState('tab2')
+  const roomsListeningTo = API.PROTECTED.getRoomsListeningTo.useQuery()
+  // const deleteListeningTo = API.PROTECTED.deleteListeningTo.useMutation()
+  const respondToHelp = API.PROTECTED.respondToHelp.useMutation()
 
-  if (room.isLoading) return <span>loading</span>
+  if (roomsListeningTo.isLoading) {
+    return (
+      <ul className="list overflow-y-scroll h-[calc(100vh-6rem)]">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <li key={i} className="list-row flex flex-col gap-y-1.5">
+            <div className="skeleton w-2/5 h-4"></div>
+            <div className="skeleton w-full h-4"></div>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
-  if (room.error) return <span>error</span>
+  if (roomsListeningTo.isError) return null
 
-  if (room.data.length) setTab('tab1')
-
-  // useEffect(() => {
-  //   if (room.roomsListeningTo.length) setTab('tab1')
-  // }, [room.roomsListeningTo.length])
+  if (!roomsListeningTo.data.length) {
+    return (
+      <div className="grow flex items-center justify-center">
+        <span className="label text-2xl">
+          {t('Dashboard.PageReceiver.SelectedDevicesTab.EmptyPlaceholder')}
+        </span>
+      </div>
+    )
+  }
 
   return (
-    <section className="grow [*]:px-4 flex flex-col">
-      <div role="tablist" className="tabs tabs-border w-full">
-        <input
-          type="radio"
-          name="tab1"
-          className="tab grow"
-          aria-label={t('Dashboard.PageReceiver.SelectedDevicesTab.Title')}
-          checked={cTab === 'tab1'}
-          onChange={() => setTab('tab1')}
-        />
-        <input
-          type="radio"
-          name="tab2"
-          className="tab grow"
-          aria-label={t('Dashboard.PageReceiver.SearchDevicesTab.Title')}
-          checked={cTab === 'tab2'}
-          onChange={() => setTab('tab2')}
-        />
-      </div>
-      {cTab === 'tab1' && <ReceiverSelectedDevices />}
-      {cTab === 'tab2' && <ReceiverSearchDevices />}
-    </section>
+    <ul className="list overflow-y-scroll h-[calc(100vh-6rem)]">
+      {roomsListeningTo.data.map((x) => (
+        <li key={x.appId} className="list-row">
+          <div
+          // iconAfter={(props) => (
+          //   <Button icon={UserMinus} scaleIcon={3} {...props}></Button>
+          // )}
+          >
+            <button onClick={() => respondToHelp.mutate({ appId: x.appId })}>
+              <span>{x.callerName}</span>
+              <span>{x.device}</span>
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
   )
 }

@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/layout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardReceiverLayoutRouteImport } from './routes/dashboard/receiver/layout'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as DashboardReceiverIndexRouteImport } from './routes/dashboard/receiver/index'
+import { Route as DashboardReceiverSearchDevicesIndexRouteImport } from './routes/dashboard/receiver/searchDevices/index'
 
 const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
   id: '/dashboard',
@@ -30,55 +32,80 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
+const DashboardReceiverLayoutRoute = DashboardReceiverLayoutRouteImport.update({
+  id: '/receiver',
+  path: '/receiver',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
 const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
 const DashboardReceiverIndexRoute = DashboardReceiverIndexRouteImport.update({
-  id: '/receiver/',
-  path: '/receiver/',
-  getParentRoute: () => DashboardLayoutRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardReceiverLayoutRoute,
 } as any)
+const DashboardReceiverSearchDevicesIndexRoute =
+  DashboardReceiverSearchDevicesIndexRouteImport.update({
+    id: '/searchDevices/',
+    path: '/searchDevices/',
+    getParentRoute: () => DashboardReceiverLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardLayoutRouteWithChildren
+  '/dashboard/receiver': typeof DashboardReceiverLayoutRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/receiver': typeof DashboardReceiverIndexRoute
+  '/dashboard/receiver/': typeof DashboardReceiverIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
+  '/dashboard/receiver/searchDevices': typeof DashboardReceiverSearchDevicesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/receiver': typeof DashboardReceiverIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
+  '/dashboard/receiver/searchDevices': typeof DashboardReceiverSearchDevicesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardLayoutRouteWithChildren
+  '/dashboard/receiver': typeof DashboardReceiverLayoutRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/receiver/': typeof DashboardReceiverIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
+  '/dashboard/receiver/searchDevices/': typeof DashboardReceiverSearchDevicesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/dashboard/receiver'
     | '/dashboard/'
+    | '/dashboard/receiver/'
+    | '/dashboard/settings'
+    | '/dashboard/receiver/searchDevices'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/dashboard'
     | '/dashboard/receiver'
     | '/dashboard/settings'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/dashboard/receiver' | '/dashboard/settings'
+    | '/dashboard/receiver/searchDevices'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/dashboard/receiver'
     | '/dashboard/'
     | '/dashboard/receiver/'
     | '/dashboard/settings/'
+    | '/dashboard/receiver/searchDevices/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -109,6 +136,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/receiver': {
+      id: '/dashboard/receiver'
+      path: '/receiver'
+      fullPath: '/dashboard/receiver'
+      preLoaderRoute: typeof DashboardReceiverLayoutRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/dashboard/settings/': {
       id: '/dashboard/settings/'
       path: '/settings'
@@ -118,23 +152,47 @@ declare module '@tanstack/react-router' {
     }
     '/dashboard/receiver/': {
       id: '/dashboard/receiver/'
-      path: '/receiver'
-      fullPath: '/dashboard/receiver'
+      path: '/'
+      fullPath: '/dashboard/receiver/'
       preLoaderRoute: typeof DashboardReceiverIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
+      parentRoute: typeof DashboardReceiverLayoutRoute
+    }
+    '/dashboard/receiver/searchDevices/': {
+      id: '/dashboard/receiver/searchDevices/'
+      path: '/searchDevices'
+      fullPath: '/dashboard/receiver/searchDevices'
+      preLoaderRoute: typeof DashboardReceiverSearchDevicesIndexRouteImport
+      parentRoute: typeof DashboardReceiverLayoutRoute
     }
   }
 }
 
-interface DashboardLayoutRouteChildren {
-  DashboardIndexRoute: typeof DashboardIndexRoute
+interface DashboardReceiverLayoutRouteChildren {
   DashboardReceiverIndexRoute: typeof DashboardReceiverIndexRoute
+  DashboardReceiverSearchDevicesIndexRoute: typeof DashboardReceiverSearchDevicesIndexRoute
+}
+
+const DashboardReceiverLayoutRouteChildren: DashboardReceiverLayoutRouteChildren =
+  {
+    DashboardReceiverIndexRoute: DashboardReceiverIndexRoute,
+    DashboardReceiverSearchDevicesIndexRoute:
+      DashboardReceiverSearchDevicesIndexRoute,
+  }
+
+const DashboardReceiverLayoutRouteWithChildren =
+  DashboardReceiverLayoutRoute._addFileChildren(
+    DashboardReceiverLayoutRouteChildren,
+  )
+
+interface DashboardLayoutRouteChildren {
+  DashboardReceiverLayoutRoute: typeof DashboardReceiverLayoutRouteWithChildren
+  DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
 }
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
+  DashboardReceiverLayoutRoute: DashboardReceiverLayoutRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardReceiverIndexRoute: DashboardReceiverIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
 }
 

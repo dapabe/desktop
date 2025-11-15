@@ -36,40 +36,43 @@ function Component(): ReactNode {
   if (isAuthenticated.data) return <Navigate to="/dashboard" />
 
   return (
-    <form
-      onSubmit={form.handleSubmit((data) => register.mutateAsync(data))}
-      className="min-h-svh flex flex-col justify-center items-center"
-    >
-      <fieldset className="fieldset bg-base-200 p-4 rounded-box">
-        <div>
-          <label htmlFor="name" className="label text-lg">
-            {t('FormLocalRegister.Label')}
+    <div className="min-h-svh flex flex-col">
+      <div className="self-end p-2">
+        <LanguageSwitcher />
+      </div>
+      <form
+        onSubmit={form.handleSubmit((data) => register.mutateAsync(data))}
+        className="flex flex-col justify-center items-center grow"
+      >
+        <fieldset className="fieldset bg-base-200 p-4 rounded-box">
+          <div>
+            <label htmlFor="name" className="label text-lg">
+              {t('FormLocalRegister.Label')}
+            </label>
+          </div>
+          <input
+            id="name"
+            {...form.register('name')}
+            disabled={form.formState.isLoading}
+            className={twJoin(
+              'input input-lg',
+              form.formState.errors?.name ? 'input-error' : 'input-neutral'
+            )}
+            placeholder={t('FormLocalRegister.Placeholder')}
+          />
+          <label role="definition" htmlFor="name" className="label text-sm">
+            {t('FormLocalRegister.Hint')}
           </label>
-
-          <LanguageSwitcher />
-        </div>
-        <input
-          id="name"
-          {...form.register('name')}
-          disabled={form.formState.isLoading}
-          className={twJoin(
-            'input input-lg',
-            form.formState.errors?.name ? 'input-error' : 'input-neutral'
-          )}
-          placeholder={t('FormLocalRegister.Placeholder')}
-        />
-        <label role="definition" htmlFor="name" className="label text-sm">
-          {t('FormLocalRegister.Hint')}
-        </label>
-        <button
-          type="submit"
-          className="btn btn-lg btn-neutral"
-          disabled={form.formState.isLoading}
-        >
-          {form.formState.isLoading ? <Spinner /> : undefined}
-          {!form.formState.isLoading && t('CommonWords.Continue')}
-        </button>
-      </fieldset>
-    </form>
+          <button
+            type="submit"
+            className="btn btn-lg btn-neutral"
+            disabled={form.formState.isLoading}
+          >
+            {form.formState.isLoading ? <Spinner /> : undefined}
+            {!form.formState.isLoading && t('CommonWords.Continue')}
+          </button>
+        </fieldset>
+      </form>
+    </div>
   )
 }

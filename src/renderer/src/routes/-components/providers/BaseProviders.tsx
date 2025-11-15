@@ -28,7 +28,7 @@ export function BaseProviders({ children }: PropsWithChildren): ReactNode {
         <QueryClientProvider client={qc}>
           {children}
           <Suspense>
-            {/* <TanStackRouterDevtools position="bottom-left" /> */}
+            <TanStackRouterDevtools position="bottom-left" />
           </Suspense>
         </QueryClientProvider>
       </API.Provider>

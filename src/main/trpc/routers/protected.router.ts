@@ -23,16 +23,26 @@ import { app } from 'electron/main'
 import { getDeviceName } from '../../utils/getDeviceName'
 
 let discoveryEE: EventEmitter
+// HMR in dev mode
 // eslint-disable-next-line prefer-const
 discoveryEE ??= AppEventBus.register('DiscoveryEE')
 
 let UDPClient: UdpSocketClient
 
+app.on('will-quit', () => {
+  UDPClient?.close()
+})
+
 export const ProtectedRouter = createTRPCRouter({
   // App actions
   getLocalData: NodeProcedure.query<ILocalDataDTO['Create']>(
     async ({ ctx }) => {
-      return await ctx.AppState.getState().getRepos().LocalData.getLocalData()
+      const currentName = await ctx.AppState.getState().getCurrentName()
+      const currentAppId = await ctx.AppState.getState().getAppId()
+      return {
+        currentAppId,
+        currentName
+      }
     }
   ),
   updateLocalName: NodeProcedure.input(RegisterLocalSchema).mutation(
@@ -72,9 +82,9 @@ export const ProtectedRouter = createTRPCRouter({
 
     return null
   }),
-  startDiscovery: NodeProcedureAuthenticated.mutation(() =>
+  startDiscovery: NodeProcedureAuthenticated.mutation(() => {
     discoveryEE.emit('start')
-  ),
+  }),
   sendDiscovery: NodeProcedureAuthenticated.subscription(({ ctx }) => {
     return observable<{ counter: number; done: boolean }>((emit) => {
       let stopped = false
@@ -82,6 +92,7 @@ export const ProtectedRouter = createTRPCRouter({
         // In case is somehow triggered more than once, unsubscribe from the event to
         discoveryEE.off('start', onStart)
         try {
+          console.log(stopped)
           for await (const res of ctx.AppState.getState().sendDiscovery()) {
             if (stopped) break
             emit.next(res)
@@ -195,8 +206,4 @@ export const ProtectedRouter = createTRPCRouter({
       )
     }
   })
-})
-
-app.on('will-quit', () => {
-  UDPClient?.close()
 })

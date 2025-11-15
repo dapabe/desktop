@@ -10,16 +10,19 @@ import { API } from '@renderer/services/trpc'
 export function UpdateNameForm(): ReactNode {
   const { t } = useTranslation()
   const LocalData = API.PROTECTED.getLocalData.useQuery()
-  const UpdateName = API.PROTECTED.updateLocalName.useMutation()
 
   const form = useForm<IRegisterLocalSchema>({
     defaultValues: { name: LocalData.data?.currentName ?? '' },
     resolver: zodResolver(RegisterLocalSchema)
   })
 
-  if (LocalData.isLoading) return <Spinner />
+  const UpdateName = API.PROTECTED.updateLocalName.useMutation({
+    onSuccess: async () => {
+      await LocalData.refetch()
+    }
+  })
 
-  if (LocalData.error) return null
+  if (LocalData.isSuccess) form.setValue('name', LocalData.data.currentName)
 
   return (
     <form onSubmit={form.handleSubmit((data) => UpdateName.mutateAsync(data))}>
@@ -31,13 +34,17 @@ export function UpdateNameForm(): ReactNode {
           <input
             id="name"
             {...form.register('name')}
-            disabled={UpdateName.isLoading}
-            // placeholder={loadErrors?.name ? 'name error on load test' : ''}
+            disabled={
+              LocalData.isLoading || UpdateName.isLoading || !!LocalData.error
+            }
+            placeholder={LocalData.error ? 'Failed to load name' : ''}
           />
         </label>
         <button
           type="submit"
-          disabled={UpdateName.isLoading}
+          disabled={
+            LocalData.isLoading || UpdateName.isLoading || !!LocalData.error
+          }
           className="btn btn-secondary join-item"
         >
           {UpdateName.isLoading ? <Spinner /> : null}
